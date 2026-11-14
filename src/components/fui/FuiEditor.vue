@@ -392,6 +392,8 @@ function onMouseClick() {
 .fui-editor__left {
     grid-area: 1 / 1 / 4 / 2;
     max-height: 100%;
+    min-height: 0;
+    overflow-y: auto;
 }
 
 .fui-editor__top {
@@ -399,17 +401,18 @@ function onMouseClick() {
 }
 
 .fui-editor__main {
-    /* width: 100%;
     grid-area: 2 / 2;
+    min-width: 0;
     min-height: 0;
-    max-height: 80vh;
-    display: flex;
-    flex-direction: column;
-    overflow: auto; */
+    height: 100%;
+    overflow: hidden;
 }
 
 .fui-editor__main-right {
     grid-area: 1 / 3 / 3 / 4;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
 .fui-editor__bottom {

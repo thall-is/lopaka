@@ -416,6 +416,55 @@ describe('ZoomPlugin', () => {
         });
     });
 
+    describe('ResizeObserver stability during selection & panning', () => {
+        it('should not shift canvas while mouse button is held down during container resize', async () => {
+            await nextTick();
+            expect(plugin.getPan().x).toBe(300);
+            expect(plugin.getPan().y).toBe(225);
+
+            // Simulate user clicking on a layer (mousedown on canvas)
+            dom.scrollContainer.dispatchEvent(
+                new MouseEvent('mousedown', {button: 0, clientX: 350, clientY: 250, bubbles: true})
+            );
+
+            // Simulate container height shrinking/growing due to Inspector panel change
+            Object.defineProperty(dom.scrollContainer, 'clientHeight', {value: 480, configurable: true});
+            (plugin as any).handleContainerResize();
+
+            // Canvas MUST stay pinned at (300, 225) while pointer is down
+            expect(plugin.getPan().x).toBe(300);
+            expect(plugin.getPan().y).toBe(225);
+
+            // Release mouse button
+            window.dispatchEvent(new MouseEvent('mouseup', {button: 0, bubbles: true}));
+        });
+
+        it('should preserve user pan across container resize instead of resetting to center', async () => {
+            await nextTick();
+
+            // User pans canvas with middle mouse drag
+            dom.scrollContainer.dispatchEvent(
+                new MouseEvent('mousedown', {button: 1, clientX: 400, clientY: 300, bubbles: true})
+            );
+            window.dispatchEvent(
+                new MouseEvent('mousemove', {buttons: 4, clientX: 460, clientY: 270, bubbles: true})
+            );
+            window.dispatchEvent(new MouseEvent('mouseup', {button: 1, bubbles: true}));
+
+            expect(plugin.getPan().x).toBe(360);
+            expect(plugin.getPan().y).toBe(195);
+
+            // Container resizes (e.g. inspector opens/closes)
+            Object.defineProperty(dom.scrollContainer, 'clientWidth', {value: 820, configurable: true});
+            Object.defineProperty(dom.scrollContainer, 'clientHeight', {value: 560, configurable: true});
+            (plugin as any).handleContainerResize();
+
+            // Must adjust smoothly by half delta (+10, -20), NOT reset back to center (310, 205)
+            expect(plugin.getPan().x).toBe(370);
+            expect(plugin.getPan().y).toBe(175);
+        });
+    });
+
     describe('onDestroy', () => {
         it('should clean up without errors', () => {
             expect(() => plugin.onDestroy()).not.toThrow();

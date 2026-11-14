@@ -2,7 +2,7 @@
     setup
     lang="ts"
 >
-import { computed, ref, toRefs } from 'vue';
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, toRefs } from 'vue';
 import { logEvent } from '/src/utils';
 import { addCustomFont, useSession } from '/src/core/session';
 import Icon from '/src/components/layout/Icon.vue';
@@ -40,18 +40,38 @@ const fontsList = computed(() => {
     return [...props.fonts, ...customFonts.value];
 });
 
-const fontsMenu = ref(null);
-const fontsBtn = ref(null);
+const fontsMenu = ref<HTMLElement | null>(null);
+const fontsBtn = ref<HTMLElement | null>(null);
 const fileLoadedCounter = ref(0);
 const isLoading = ref(false);
 const isFontWarningVisible = ref(false);
 const isWizardVisible = ref(false);
 const fontFile = ref();
+const isMenuOpen = ref(false);
+const menuStyle = ref<Record<string, string>>({});
 
 const emit = defineEmits(['change']);
 
+function updateMenuPosition() {
+    if (!fontsBtn.value) return;
+    const rect = fontsBtn.value.getBoundingClientRect();
+    const menuWidth = 208;
+    const margin = 8;
+    const maxMenuHeight = Math.floor(window.innerHeight * 0.75);
+    const left = Math.max(margin, rect.left - menuWidth - 6);
+    const top = Math.max(margin, Math.min(rect.top - 8, window.innerHeight - maxMenuHeight - margin));
+    menuStyle.value = {
+        position: 'fixed',
+        left: `${left}px`,
+        top: `${top}px`,
+        width: `${menuWidth}px`,
+        zIndex: '9999',
+    };
+}
+
 function onClick(font: TPlatformFont) {
-    fontsBtn.value.blur();
+    hideFontsMenu();
+    fontsBtn.value?.blur();
     logEvent('select_font', font.name);
     emit('change', {
         target: { value: font.name, title: font.title },
@@ -59,11 +79,52 @@ function onClick(font: TPlatformFont) {
 }
 
 function hideFontsMenu() {
-    fontsMenu.value.classList.add('hidden');
+    isMenuOpen.value = false;
 }
+
 function showFontsMenu() {
-    fontsMenu.value.classList.remove('hidden');
+    if (props.disabled) return;
+    updateMenuPosition();
+    isMenuOpen.value = true;
+    nextTick(() => {
+        updateMenuPosition();
+        const activeEl = fontsMenu.value?.querySelector('a.bg-neutral') as HTMLElement | null;
+        activeEl?.scrollIntoView({ block: 'nearest' });
+    });
 }
+
+function toggleFontsMenu() {
+    if (isMenuOpen.value) {
+        hideFontsMenu();
+    } else {
+        showFontsMenu();
+    }
+}
+
+function handleDocumentPointerDown(e: MouseEvent) {
+    if (!isMenuOpen.value) return;
+    const target = e.target as Node | null;
+    if (fontsBtn.value?.contains(target) || fontsMenu.value?.contains(target)) {
+        return;
+    }
+    hideFontsMenu();
+}
+
+function handleDocumentKeyDown(e: KeyboardEvent) {
+    if (isMenuOpen.value && e.key === 'Escape') {
+        hideFontsMenu();
+    }
+}
+
+onMounted(() => {
+    document.addEventListener('mousedown', handleDocumentPointerDown, true);
+    document.addEventListener('keydown', handleDocumentKeyDown);
+});
+
+onBeforeUnmount(() => {
+    document.removeEventListener('mousedown', handleDocumentPointerDown, true);
+    document.removeEventListener('keydown', handleDocumentKeyDown);
+});
 
 async function onFileChange(e: Event) {
     logEvent('import_font');
@@ -160,97 +221,40 @@ function closeWizard() {
     </div>
     <button
         ref="fontsBtn"
+        type="button"
         :disabled="disabled"
         class="select select-sm select-bordered relative"
         :class="{ 'cursor-not-allowed': disabled }"
-        @click.self="showFontsMenu"
-        @blur="hideFontsMenu"
+        @click.stop="toggleFontsMenu"
     >
         <div class="truncate pointer-events-none w-[128px] text-left flex">
             {{fontsList.find((font) => font.name === fontValue)?.title}}
         </div>
-        <div class="overflow-hidden w-48 right-[100%] -top-2 absolute z-20 rounded-box">
+    </button>
+    <Teleport to="body">
+        <div
+            v-if="isMenuOpen"
+            :style="menuStyle"
+            class="rounded-box shadow-xl border border-base-content/20 overflow-hidden bg-secondary"
+        >
             <ul
                 ref="fontsMenu"
-                class="menu menu-xs max-h-[75vh] overflow-x-hidden overflow-y-auto box-content bg-secondary block hidden"
+                class="menu menu-xs max-h-[75vh] overflow-x-hidden overflow-y-auto bg-secondary block w-full"
             >
-                <!-- TODO: add support for local fonts
-                  <template v-if="fontTypes">
-                    <li>
-                        <label class="relative">
-                            Import {{ platform === 'u8g2' ? 'BDF' : '' }} font...
-                            <div
-                                v-if="isLoading"
-                                class="loading loading-xs loading-spinner text-primary"
-                            ></div>
-                            <input
-                                type="file"
-                                style="position: fixed; top: -1000%"
-                                :accept="fontTypes"
-                                @change="onFileChange"
-                                ref="fileInput"
-                                :key="fileLoadedCounter"
-                                :disabled="isLoading"
-                            />
-                        </label>
-                    </li>
-                    <div class="divider h-1 py-0 my-1"></div>
-                </template>
-<template v-if="customFonts.length">
-                    <TransitionGroup name="highlight">
-                        <li
-                            v-for="font in customFonts"
-                            :key="font.name"
-                        >
-                            <a
-                                class="flex justify-between custom-font-item max-w-full"
-                                :class="{'bg-neutral text-primary': fontValue === font.name}"
-                                @click="onClick(font)"
-                            >
-                                <div class="truncate">{{ font.title }}</div>
-                                <div
-                                    v-if="!fontsUsed.includes(font.name)"
-                                    class="px-1"
-                                    @click.prevent.stop="deleteFont(font)"
-                                >
-                                    <Icon
-                                        type="trash"
-                                        class="-mr-1 custom-font-icon"
-                                        danger
-                                        title="Delete font"
-                                        xs
-                                    />
-                                </div>
-                                <div
-                                    v-else
-                                    class="px-1"
-                                    @click.prevent.stop="showToast"
-                                >
-                                    <Icon
-                                        type="trash"
-                                        class="-mr-1 custom-font-icon text-neutral"
-                                        xs
-                                    />
-                                </div>
-                            </a>
-                        </li>
-                    </TransitionGroup>
-                    <div class="divider h-1 py-0 my-1"></div>
-                </template> -->
                 <li
                     v-for="font in fonts"
                     :key="font.name"
                 >
                     <a
                         :class="{ 'bg-neutral text-primary': fontValue === font.name }"
-                        @click="onClick(font)"
+                        @mousedown.prevent="onClick(font)"
                     >
                         {{ font.title }}
                     </a>
                 </li>
             </ul>
         </div>
-    </button>
+    </Teleport>
 </template>
 <style
     lang="css"

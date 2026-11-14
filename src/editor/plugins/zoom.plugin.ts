@@ -14,19 +14,28 @@ export class ZoomPlugin extends AbstractEditorPlugin {
     private stopDisplayWatch: WatchStopHandle | null = null;
     private isWheelZooming = false;
     private isMiddlePanning = false;
+    private isPointerDown = false;
+    private pendingResize = false;
     private hasUserPanned = false;
+    private hasUserViewportAdjust = false;
+    private lastContainerWidth = 0;
+    private lastContainerHeight = 0;
     private lastPanClientX = 0;
     private lastPanClientY = 0;
 
-    private boundMouseDown = (e: MouseEvent) => this.handleMiddleMouseDown(e);
+    private boundMouseDown = (e: MouseEvent) => this.handleContainerMouseDown(e);
     private boundMouseMove = (e: MouseEvent) => this.handleMiddleMouseMove(e);
-    private boundMouseUp = (e: MouseEvent) => this.handleMiddleMouseUp(e);
+    private boundMouseUp = (e: MouseEvent) => this.handleGlobalMouseUp(e);
     private boundAuxClick = (e: MouseEvent) => {
         if (e.button === 1) {
             e.preventDefault();
         }
     };
-    private boundBlur = () => this.stopMiddlePan();
+    private boundBlur = () => {
+        this.isPointerDown = false;
+        this.stopMiddlePan();
+        this.flushPendingResize();
+    };
 
     constructor(session: Session, container: HTMLElement) {
         super(session, container);
@@ -75,9 +84,12 @@ export class ZoomPlugin extends AbstractEditorPlugin {
             {flush: 'sync'}
         );
 
+        this.lastContainerWidth = sc.clientWidth;
+        this.lastContainerHeight = sc.clientHeight;
+
         // Watch for container resize (window resize)
         this.resizeObserver = new ResizeObserver(() => {
-            this.centerCanvas();
+            this.handleContainerResize();
         });
         this.resizeObserver.observe(sc);
 
@@ -103,7 +115,8 @@ export class ZoomPlugin extends AbstractEditorPlugin {
         }
     }
 
-    private handleMiddleMouseDown(event: MouseEvent): void {
+    private handleContainerMouseDown(event: MouseEvent): void {
+        this.isPointerDown = true;
         if (event.button !== 1) return;
         event.preventDefault();
         event.stopPropagation();
@@ -130,15 +143,71 @@ export class ZoomPlugin extends AbstractEditorPlugin {
         this.panX += dx;
         this.panY += dy;
         this.hasUserPanned = true;
+        this.hasUserViewportAdjust = true;
         this.clampFreePan();
         this.applyTransform();
     }
 
-    private handleMiddleMouseUp(event: MouseEvent): void {
+    private handleGlobalMouseUp(event: MouseEvent): void {
+        if (this.isPointerDown) {
+            this.isPointerDown = false;
+            this.flushPendingResize();
+        }
         if (!this.isMiddlePanning) return;
         if (event.button === 1 || event.type === 'mouseup') {
             this.stopMiddlePan();
         }
+    }
+
+    private handleContainerResize(): void {
+        const sc = this.getScrollContainer();
+        if (!sc) return;
+
+        const newW = sc.clientWidth;
+        const newH = sc.clientHeight;
+        if (newW === this.lastContainerWidth && newH === this.lastContainerHeight) {
+            return;
+        }
+
+        if (this.isPointerDown) {
+            // Defer resize reaction until pointer interaction ends so clicking/dragging a layer
+            // never shifts the canvas underneath the cursor.
+            this.pendingResize = true;
+            return;
+        }
+
+        this.applyContainerResize(newW, newH);
+    }
+
+    private flushPendingResize(): void {
+        if (!this.pendingResize) return;
+        this.pendingResize = false;
+        const sc = this.getScrollContainer();
+        if (!sc) return;
+        this.applyContainerResize(sc.clientWidth, sc.clientHeight);
+    }
+
+    private applyContainerResize(newW: number, newH: number): void {
+        const prevW = this.lastContainerWidth;
+        const prevH = this.lastContainerHeight;
+        this.lastContainerWidth = newW;
+        this.lastContainerHeight = newH;
+
+        if (!this.hasUserViewportAdjust) {
+            this.centerCanvas();
+            return;
+        }
+
+        if (prevW > 0 && prevH > 0) {
+            this.panX += (newW - prevW) / 2;
+            this.panY += (newH - prevH) / 2;
+        }
+        if (this.hasUserPanned) {
+            this.clampFreePan();
+        } else {
+            this.clampPan();
+        }
+        this.applyTransform();
     }
 
     private stopMiddlePan(): void {
@@ -226,6 +295,7 @@ export class ZoomPlugin extends AbstractEditorPlugin {
         nextTick(() => {
             this.panX = newPanX;
             this.panY = newPanY;
+            this.hasUserViewportAdjust = true;
             if (this.hasUserPanned) {
                 this.clampFreePan();
             } else {
@@ -239,6 +309,7 @@ export class ZoomPlugin extends AbstractEditorPlugin {
     private handlePan(event: WheelEvent): void {
         this.panX -= event.deltaX;
         this.panY -= event.deltaY;
+        this.hasUserViewportAdjust = true;
         this.clampPan();
         this.applyTransform();
     }
@@ -271,6 +342,7 @@ export class ZoomPlugin extends AbstractEditorPlugin {
         const canvasH = cw.offsetHeight;
 
         this.hasUserPanned = false;
+        this.hasUserViewportAdjust = false;
         this.panX = (containerW - canvasW) / 2;
         this.panY = (containerH - canvasH) / 2;
         this.applyTransform();

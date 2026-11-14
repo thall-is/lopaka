@@ -85,18 +85,18 @@ u8g2_SetDrawColor(&s_u8g2, 1);
 // Monolito SEELE 01 (X=46..127, Y=0..63)
 u8g2_DrawXBM(&s_u8g2, 46, 0, 82, 64, image_seele_bits);
 // Titulo
-u8g2_SetFont(&s_u8g2, u8g2_font_helvB08_tr);
-u8g2_DrawStr(&s_u8g2, 1, 11, "FORMATO");
+u8g2_SetFont(&s_u8g2, u8g2_font_helvB08_te);
+u8g2_DrawUTF8(&s_u8g2, 1, 11, "FORMATO");
 // Badge invertido
 u8g2_DrawBox(&s_u8g2, 7, 14, 32, 13);
 u8g2_SetDrawColor(&s_u8g2, 0);
-u8g2_DrawStr(&s_u8g2, 14, 24, "ALAC");
+u8g2_DrawUTF8(&s_u8g2, 14, 24, "ALAC");
 // Mensagem inferior
 u8g2_SetDrawColor(&s_u8g2, 1);
-u8g2_SetFont(&s_u8g2, u8g2_font_helvB08_tr);
-u8g2_DrawStr(&s_u8g2, 14, 43, "Nao");
-u8g2_SetFont(&s_u8g2, u8g2_font_4x6_tr);
-u8g2_DrawStr(&s_u8g2, 3, 56, "SUPORTADO!");`,
+u8g2_SetFont(&s_u8g2, u8g2_font_helvB08_te);
+u8g2_DrawUTF8(&s_u8g2, 14, 43, "Nao");
+u8g2_SetFont(&s_u8g2, u8g2_font_4x6_tf);
+u8g2_DrawUTF8(&s_u8g2, 3, 56, "SUPORTADO!");`,
         },
         {
             id: 'seele_flac_limit',
@@ -109,16 +109,16 @@ u8g2_DrawStr(&s_u8g2, 3, 56, "SUPORTADO!");`,
             cCode: `${buildDecl(bitmaps, ['image_seele_bits'])}
 u8g2_SetDrawColor(&s_u8g2, 1);
 u8g2_DrawXBM(&s_u8g2, 46, 0, 82, 64, image_seele_bits);
-u8g2_SetFont(&s_u8g2, u8g2_font_helvB08_tr);
-u8g2_DrawStr(&s_u8g2, 6, 11, "LIMITE");
+u8g2_SetFont(&s_u8g2, u8g2_font_helvB08_te);
+u8g2_DrawUTF8(&s_u8g2, 6, 11, "LIMITE");
 u8g2_DrawBox(&s_u8g2, 7, 14, 32, 13);
 u8g2_SetDrawColor(&s_u8g2, 0);
-u8g2_DrawStr(&s_u8g2, 11, 24, "FLAC");
+u8g2_DrawUTF8(&s_u8g2, 11, 24, "FLAC");
 u8g2_SetDrawColor(&s_u8g2, 1);
-u8g2_SetFont(&s_u8g2, u8g2_font_4x6_tr);
-u8g2_DrawStr(&s_u8g2, 5, 38, "EXCEDIDO!");
-u8g2_DrawStr(&s_u8g2, 3, 48, "MAX 24-BIT");
-u8g2_DrawStr(&s_u8g2, 9, 58, "192 KHZ");`,
+u8g2_SetFont(&s_u8g2, u8g2_font_4x6_tf);
+u8g2_DrawUTF8(&s_u8g2, 5, 38, "EXCEDIDO!");
+u8g2_DrawUTF8(&s_u8g2, 3, 48, "MAX 24-BIT");
+u8g2_DrawUTF8(&s_u8g2, 9, 58, "192 KHZ");`,
         },
         {
             id: 'seele_wav_limit',
@@ -131,16 +131,16 @@ u8g2_DrawStr(&s_u8g2, 9, 58, "192 KHZ");`,
             cCode: `${buildDecl(bitmaps, ['image_seele_bits'])}
 u8g2_SetDrawColor(&s_u8g2, 1);
 u8g2_DrawXBM(&s_u8g2, 46, 0, 82, 64, image_seele_bits);
-u8g2_SetFont(&s_u8g2, u8g2_font_helvB08_tr);
-u8g2_DrawStr(&s_u8g2, 6, 11, "LIMITE");
+u8g2_SetFont(&s_u8g2, u8g2_font_helvB08_te);
+u8g2_DrawUTF8(&s_u8g2, 6, 11, "LIMITE");
 u8g2_DrawBox(&s_u8g2, 8, 14, 30, 13);
 u8g2_SetDrawColor(&s_u8g2, 0);
-u8g2_DrawStr(&s_u8g2, 13, 24, "WAV");
+u8g2_DrawUTF8(&s_u8g2, 13, 24, "WAV");
 u8g2_SetDrawColor(&s_u8g2, 1);
-u8g2_SetFont(&s_u8g2, u8g2_font_4x6_tr);
-u8g2_DrawStr(&s_u8g2, 5, 38, "EXCEDIDO!");
-u8g2_DrawStr(&s_u8g2, 3, 48, "MAX 32-BIT");
-u8g2_DrawStr(&s_u8g2, 9, 58, "384 KHZ");`,
+u8g2_SetFont(&s_u8g2, u8g2_font_4x6_tf);
+u8g2_DrawUTF8(&s_u8g2, 5, 38, "EXCEDIDO!");
+u8g2_DrawUTF8(&s_u8g2, 3, 48, "MAX 32-BIT");
+u8g2_DrawUTF8(&s_u8g2, 9, 58, "384 KHZ");`,
         },
         {
             id: 'now_playing_classic',
@@ -149,63 +149,60 @@ u8g2_DrawStr(&s_u8g2, 9, 58, "384 KHZ");`,
             description: 'Tela principal de reprodução Classic com cards sem quina, barra com 1px de padding e bateria 5x7.',
             width: 128,
             height: 64,
-            sourceRef: 'oled_display.c:1758',
+            sourceRef: 'oled_display.c:1770',
             cCode: `${buildDecl(bitmaps, ['image_Play_bits', 's_icon_heart_solid_9x9', 's_icon_loop_all_9x9', 's_icon_shuf_all_9x9'])}
+static const unsigned char s_icon_bt_conn_7x9[] U8X8_PROGMEM = {0x0c, 0x14, 0x25, 0x16, 0x4c, 0x16, 0x25, 0x14, 0x0c};
+static const unsigned char s_icon_bat_98_11x9[] U8X8_PROGMEM = {0xfe, 0x03, 0x01, 0x04, 0xdd, 0x05, 0x55, 0x05, 0xdd, 0x05, 0x51, 0x05, 0xd1, 0x05, 0x01, 0x04, 0xfe, 0x03};
 u8g2_SetDrawColor(&s_u8g2, 1);
 // Topbar
 u8g2_DrawXBM(&s_u8g2, 0, 0, 5, 9, image_Play_bits);
-u8g2_DrawXBM(&s_u8g2, 8, 0, 9, 9, s_icon_heart_solid_9x9);
-u8g2_DrawXBM(&s_u8g2, 19, 0, 9, 9, s_icon_loop_all_9x9);
-u8g2_DrawXBM(&s_u8g2, 30, 0, 9, 9, s_icon_shuf_all_9x9);
+u8g2_DrawXBM(&s_u8g2, 7, 0, 9, 9, s_icon_loop_all_9x9);
+u8g2_DrawXBM(&s_u8g2, 18, 0, 9, 9, s_icon_shuf_all_9x9);
 // Artist Bracket (sem quinas inferiores)
-u8g2_DrawLine(&s_u8g2, 43, 0, 43, 8);
-u8g2_DrawLine(&s_u8g2, 101, 0, 101, 8);
-u8g2_DrawLine(&s_u8g2, 44, 9, 100, 9);
-u8g2_SetFont(&s_u8g2, u8g2_font_helvB08_tr);
-u8g2_DrawStr(&s_u8g2, 48, 8, "EVA OST");
-// Battery icon (13x10 sem quinas + polo esquerdo 6px + 5x7)
-u8g2_DrawHLine(&s_u8g2, 116, 0, 11);
-u8g2_DrawHLine(&s_u8g2, 116, 9, 11);
-u8g2_DrawVLine(&s_u8g2, 115, 1, 8);
-u8g2_DrawVLine(&s_u8g2, 127, 1, 8);
-u8g2_DrawVLine(&s_u8g2, 114, 2, 6);
-u8g2_SetFont(&s_u8g2, u8g2_font_5x7_tr);
-u8g2_DrawStr(&s_u8g2, 117, 8, "98");
+u8g2_DrawLine(&s_u8g2, 35, 0, 35, 8);
+u8g2_DrawLine(&s_u8g2, 93, 0, 93, 8);
+u8g2_DrawLine(&s_u8g2, 36, 9, 92, 9);
+u8g2_SetFont(&s_u8g2, u8g2_font_helvB08_te);
+u8g2_DrawUTF8(&s_u8g2, 41, 8, "EVA OST");
+// Bluetooth conectado (7x9) + Coracao (9x9) + Bateria (11x9)
+u8g2_DrawXBM(&s_u8g2, 97, 0, 7, 9, s_icon_bt_conn_7x9);
+u8g2_DrawXBM(&s_u8g2, 106, 0, 9, 9, s_icon_heart_solid_9x9);
+u8g2_DrawXBM(&s_u8g2, 117, 0, 11, 9, s_icon_bat_98_11x9);
 // Title
-u8g2_SetFont(&s_u8g2, u8g2_font_t0_22b_tr);
-u8g2_DrawStr(&s_u8g2, 8, 28, "Fly Me...");
-// Progress Bar (moldura sem quinas + 1px de padding)
+u8g2_SetFont(&s_u8g2, u8g2_font_t0_22b_te);
+u8g2_DrawUTF8(&s_u8g2, 8, 28, "Fly Me...");
+// Progress Bar (moldura sem quinas + preenchimento completo sem padding)
 u8g2_DrawHLine(&s_u8g2, 1, 33, 126);
 u8g2_DrawHLine(&s_u8g2, 1, 43, 126);
 u8g2_DrawVLine(&s_u8g2, 0, 34, 9);
 u8g2_DrawVLine(&s_u8g2, 127, 34, 9);
-u8g2_DrawBox(&s_u8g2, 2, 35, 58, 7);
-u8g2_SetFont(&s_u8g2, u8g2_font_4x6_tr);
+u8g2_DrawBox(&s_u8g2, 1, 34, 59, 9);
+u8g2_SetFont(&s_u8g2, u8g2_font_4x6_tf);
 u8g2_SetDrawColor(&s_u8g2, 0);
-u8g2_DrawStr(&s_u8g2, 4, 41, "01:42");
+u8g2_DrawUTF8(&s_u8g2, 4, 41, "01:42");
 u8g2_SetDrawColor(&s_u8g2, 1);
-u8g2_DrawStr(&s_u8g2, 104, 41, "04:31");
+u8g2_DrawUTF8(&s_u8g2, 104, 41, "04:31");
 // Album
-u8g2_SetFont(&s_u8g2, u8g2_font_helvB08_tr);
-u8g2_DrawStr(&s_u8g2, 24, 53, "Neon Genesis OST");
+u8g2_SetFont(&s_u8g2, u8g2_font_helvB08_te);
+u8g2_DrawUTF8(&s_u8g2, 24, 53, "Neon Genesis OST");
 // 4 Codec Cards (sem quinas superiores)
-u8g2_SetFont(&s_u8g2, u8g2_font_4x6_tr);
+u8g2_SetFont(&s_u8g2, u8g2_font_4x6_tf);
 u8g2_DrawVLine(&s_u8g2, 2, 58, 6);
 u8g2_DrawHLine(&s_u8g2, 3, 57, 19);
 u8g2_DrawVLine(&s_u8g2, 22, 58, 6);
-u8g2_DrawStr(&s_u8g2, 5, 64, "FLAC");
+u8g2_DrawUTF8(&s_u8g2, 5, 64, "FLAC");
 u8g2_DrawVLine(&s_u8g2, 36, 58, 6);
 u8g2_DrawHLine(&s_u8g2, 37, 57, 15);
 u8g2_DrawVLine(&s_u8g2, 52, 58, 6);
-u8g2_DrawStr(&s_u8g2, 39, 64, "24b");
+u8g2_DrawUTF8(&s_u8g2, 39, 64, "24b");
 u8g2_DrawVLine(&s_u8g2, 66, 58, 6);
 u8g2_DrawHLine(&s_u8g2, 67, 57, 19);
 u8g2_DrawVLine(&s_u8g2, 86, 58, 6);
-u8g2_DrawStr(&s_u8g2, 69, 64, "192k");
+u8g2_DrawUTF8(&s_u8g2, 69, 64, "192k");
 u8g2_DrawVLine(&s_u8g2, 100, 58, 6);
 u8g2_DrawHLine(&s_u8g2, 101, 57, 23);
 u8g2_DrawVLine(&s_u8g2, 124, 58, 6);
-u8g2_DrawStr(&s_u8g2, 103, 64, "4608k");`,
+u8g2_DrawUTF8(&s_u8g2, 103, 64, "4608k");`,
         },
         {
             id: 'now_playing_hybrid',
@@ -222,24 +219,24 @@ u8g2_DrawXBM(&s_u8g2, 8, 1, 9, 9, s_icon_heart_outline_9x9);
 u8g2_DrawLine(&s_u8g2, 42, 10, 100, 10);
 u8g2_DrawLine(&s_u8g2, 42, 10, 42, 0);
 u8g2_DrawLine(&s_u8g2, 100, 10, 100, 0);
-u8g2_SetFont(&s_u8g2, u8g2_font_helvB08_tr);
-u8g2_DrawStr(&s_u8g2, 46, 8, "Sagisu S.");
+u8g2_SetFont(&s_u8g2, u8g2_font_helvB08_te);
+u8g2_DrawUTF8(&s_u8g2, 46, 8, "Sagisu S.");
 u8g2_DrawFrame(&s_u8g2, 113, 2, 13, 7);
 u8g2_DrawBox(&s_u8g2, 115, 4, 8, 3);
 // Title & Progress
-u8g2_SetFont(&s_u8g2, u8g2_font_t0_22b_tr);
-u8g2_DrawStr(&s_u8g2, 6, 28, "Komm Susser");
+u8g2_SetFont(&s_u8g2, u8g2_font_t0_22b_te);
+u8g2_DrawUTF8(&s_u8g2, 6, 28, "Komm Susser");
 u8g2_DrawFrame(&s_u8g2, 0, 33, 128, 11);
 u8g2_DrawBox(&s_u8g2, 2, 35, 82, 7);
 // Album compact
-u8g2_SetFont(&s_u8g2, u8g2_font_4x6_tr);
-u8g2_DrawStr(&s_u8g2, 26, 50, "THE END OF EVANGELION");
+u8g2_SetFont(&s_u8g2, u8g2_font_4x6_tf);
+u8g2_DrawUTF8(&s_u8g2, 26, 50, "THE END OF EVANGELION");
 // Stereo L/R VU
-u8g2_DrawStr(&s_u8g2, 0, 57, "L");
+u8g2_DrawUTF8(&s_u8g2, 0, 57, "L");
 u8g2_DrawFrame(&s_u8g2, 9, 53, 118, 5);
 u8g2_DrawBox(&s_u8g2, 11, 54, 84, 3);
 u8g2_DrawBox(&s_u8g2, 102, 54, 2, 3);
-u8g2_DrawStr(&s_u8g2, 0, 63, "R");
+u8g2_DrawUTF8(&s_u8g2, 0, 63, "R");
 u8g2_DrawFrame(&s_u8g2, 9, 59, 118, 5);
 u8g2_DrawBox(&s_u8g2, 11, 60, 76, 3);
 u8g2_DrawBox(&s_u8g2, 94, 60, 2, 3);`,
@@ -258,83 +255,102 @@ u8g2_DrawXBM(&s_u8g2, 1, 1, 5, 9, image_Play_bits);
 u8g2_DrawLine(&s_u8g2, 38, 11, 90, 11);
 u8g2_DrawLine(&s_u8g2, 38, 10, 38, 0);
 u8g2_DrawLine(&s_u8g2, 90, 11, 90, 0);
-u8g2_SetFont(&s_u8g2, u8g2_font_helvB08_tr);
-u8g2_DrawStr(&s_u8g2, 42, 9, "USB DAC");
+u8g2_SetFont(&s_u8g2, u8g2_font_helvB08_te);
+u8g2_DrawUTF8(&s_u8g2, 42, 9, "USB DAC");
 u8g2_DrawFrame(&s_u8g2, 113, 2, 13, 7);
 u8g2_DrawBox(&s_u8g2, 115, 4, 10, 3);
 u8g2_DrawHLine(&s_u8g2, 0, 13, 128);
-u8g2_SetFont(&s_u8g2, u8g2_font_4x6_tr);
-u8g2_DrawStr(&s_u8g2, 0, 20, "Vol: 82%");
-u8g2_DrawStr(&s_u8g2, 66, 20, "STREAMING ATIVO");
+u8g2_SetFont(&s_u8g2, u8g2_font_4x6_tf);
+u8g2_DrawUTF8(&s_u8g2, 0, 20, "Vol: 82%");
+u8g2_DrawUTF8(&s_u8g2, 66, 20, "STREAMING ATIVO");
 // L / R Big Bars
-u8g2_DrawStr(&s_u8g2, 0, 28, "L");
+u8g2_DrawUTF8(&s_u8g2, 0, 28, "L");
 u8g2_DrawFrame(&s_u8g2, 10, 22, 117, 8);
 u8g2_DrawBox(&s_u8g2, 11, 23, 88, 6);
 u8g2_DrawBox(&s_u8g2, 105, 23, 2, 6);
-u8g2_DrawStr(&s_u8g2, 0, 39, "R");
+u8g2_DrawUTF8(&s_u8g2, 0, 39, "R");
 u8g2_DrawFrame(&s_u8g2, 10, 33, 117, 8);
 u8g2_DrawBox(&s_u8g2, 11, 34, 82, 6);
 u8g2_DrawBox(&s_u8g2, 99, 34, 2, 6);
 // Scale dB
-u8g2_DrawStr(&s_u8g2, 10, 48, "-40");
-u8g2_DrawStr(&s_u8g2, 51, 48, "-24");
-u8g2_DrawStr(&s_u8g2, 85, 48, "-12");
-u8g2_DrawStr(&s_u8g2, 104, 48, "-6");
-u8g2_DrawStr(&s_u8g2, 120, 48, "0");
+u8g2_DrawUTF8(&s_u8g2, 10, 48, "-40");
+u8g2_DrawUTF8(&s_u8g2, 51, 48, "-24");
+u8g2_DrawUTF8(&s_u8g2, 85, 48, "-12");
+u8g2_DrawUTF8(&s_u8g2, 104, 48, "-6");
+u8g2_DrawUTF8(&s_u8g2, 120, 48, "0");
 u8g2_DrawHLine(&s_u8g2, 0, 50, 128);
 u8g2_DrawFrame(&s_u8g2, 0, 56, 24, 8);
-u8g2_DrawStr(&s_u8g2, 5, 63, "24b");
+u8g2_DrawUTF8(&s_u8g2, 5, 63, "24b");
 u8g2_DrawFrame(&s_u8g2, 32, 56, 24, 8);
-u8g2_DrawStr(&s_u8g2, 37, 63, "48k");
+u8g2_DrawUTF8(&s_u8g2, 37, 63, "48k");
 u8g2_DrawFrame(&s_u8g2, 64, 56, 34, 8);
-u8g2_DrawStr(&s_u8g2, 69, 63, "Rock");`,
+u8g2_DrawUTF8(&s_u8g2, 69, 63, "Rock");`,
         },
         {
             id: 'wifi_connected_screen',
             title: 'wifi_portal_ip',
             category: 'Connectivity',
-            description: 'Central Web Wi-Fi conectada exibindo RSSI, IP local e endereço http://mps3.local.',
+            description: 'Central Web Wi-Fi com barra XOR de sinal RSSI no topo, bloco central unificado de status/IP e URL http://mps3.local.',
             width: 128,
             height: 64,
-            sourceRef: 'oled_display.c:3492',
+            sourceRef: 'oled_display.c:3939',
             cCode: `u8g2_SetDrawColor(&s_u8g2, 1);
 u8g2_DrawFrame(&s_u8g2, 0, 0, 128, 12);
 u8g2_SetFont(&s_u8g2, u8g2_font_haxrcorp4089_tr);
-u8g2_DrawStr(&s_u8g2, 3, 9, "-52 dBm");
-u8g2_DrawStr(&s_u8g2, 44, 9, "CONECTADO");
-u8g2_DrawStr(&s_u8g2, 102, 9, "Cli:1");
-u8g2_DrawRFrame(&s_u8g2, 2, 15, 124, 19, 3);
-u8g2_SetFont(&s_u8g2, u8g2_font_profont15_tr);
-u8g2_DrawStr(&s_u8g2, 16, 29, "192.168.1.42");
-u8g2_SetFont(&s_u8g2, u8g2_font_6x10_tr);
-u8g2_DrawStr(&s_u8g2, 14, 46, "http://mps3.local");
-u8g2_SetFont(&s_u8g2, u8g2_font_4x6_tr);
-u8g2_DrawStr(&s_u8g2, 24, 59, "Acesse pelo navegador");`,
+u8g2_DrawUTF8(&s_u8g2, 45, 9, "-52 dBm");
+u8g2_SetDrawColor(&s_u8g2, 2);
+u8g2_DrawBox(&s_u8g2, 1, 1, 79, 10);
+u8g2_SetDrawColor(&s_u8g2, 1);
+u8g2_DrawRFrame(&s_u8g2, 2, 23, 124, 19, 3);
+u8g2_SetFont(&s_u8g2, u8g2_font_t0_16b_te);
+u8g2_DrawUTF8(&s_u8g2, 4, 38, "192.168.100.420");
+u8g2_SetFont(&s_u8g2, u8g2_font_t0_14b_te);
+u8g2_DrawUTF8(&s_u8g2, 5, 62, "http://mps3.local");`,
         },
         {
             id: 'wifi_transfer_screen',
             title: 'wifi_upload_rx',
             category: 'Connectivity',
-            description: 'Tela de upload de músicas via Wi-Fi com velocidade em KB/s, arquivo atual e barras de lote.',
+            description: 'Tela de upload de músicas via Wi-Fi com barra XOR de sinal RSSI, velocidade, cápsulas de ETA e barras de progresso.',
             width: 128,
             height: 64,
-            sourceRef: 'oled_display.c:3546',
+            sourceRef: 'oled_display.c:3993',
             cCode: `u8g2_SetDrawColor(&s_u8g2, 1);
-u8g2_DrawFrame(&s_u8g2, 0, 0, 50, 11);
+// Connection tab with XOR RSSI bar
+u8g2_DrawVLine(&s_u8g2, 0, 0, 9);
+u8g2_DrawVLine(&s_u8g2, 65, 0, 9);
+u8g2_DrawHLine(&s_u8g2, 1, 9, 64);
 u8g2_SetFont(&s_u8g2, u8g2_font_haxrcorp4089_tr);
-u8g2_DrawStr(&s_u8g2, 3, 8, "-54 dBm");
-u8g2_DrawStr(&s_u8g2, 74, 8, "1240 KB/s");
-u8g2_SetFont(&s_u8g2, u8g2_font_profont11_tr);
-u8g2_DrawStr(&s_u8g2, 0, 23, "03_Cruel_Angel.flac");
+u8g2_DrawUTF8(&s_u8g2, 3, 8, "-54 dBm");
+u8g2_SetDrawColor(&s_u8g2, 2);
+u8g2_DrawBox(&s_u8g2, 1, 0, 42, 9);
+u8g2_SetDrawColor(&s_u8g2, 1);
+// Speed tab
+u8g2_DrawVLine(&s_u8g2, 71, 0, 9);
+u8g2_DrawVLine(&s_u8g2, 122, 0, 9);
+u8g2_DrawHLine(&s_u8g2, 72, 9, 50);
+u8g2_DrawUTF8(&s_u8g2, 74, 8, "1240 KB/s");
+// Filename + File ETA pill
+u8g2_SetFont(&s_u8g2, u8g2_font_t0_13b_te);
+u8g2_DrawUTF8(&s_u8g2, 0, 24, "03_Angel.flac");
+u8g2_DrawRFrame(&s_u8g2, 110, 14, 13, 11, 1);
 u8g2_SetFont(&s_u8g2, u8g2_font_haxrcorp4089_tr);
-u8g2_DrawStr(&s_u8g2, 112, 23, "4s");
+u8g2_DrawUTF8(&s_u8g2, 112, 23, "4s");
 // File progress bar
 u8g2_DrawFrame(&s_u8g2, 0, 27, 128, 10);
 u8g2_DrawBox(&s_u8g2, 1, 28, 76, 8);
-// Total row
-u8g2_DrawStr(&s_u8g2, 0, 47, "Total:");
-u8g2_DrawStr(&s_u8g2, 34, 47, "|3/12|");
-u8g2_DrawStr(&s_u8g2, 108, 47, "38s");
+// Total row + counter & ETA pills
+u8g2_DrawUTF8(&s_u8g2, 0, 47, "Total:");
+u8g2_DrawRFrame(&s_u8g2, 32, 38, 24, 11, 1);
+u8g2_DrawPixel(&s_u8g2, 43, 39);
+u8g2_DrawPixel(&s_u8g2, 43, 41);
+u8g2_DrawPixel(&s_u8g2, 43, 43);
+u8g2_DrawPixel(&s_u8g2, 43, 45);
+u8g2_DrawPixel(&s_u8g2, 43, 47);
+u8g2_DrawUTF8(&s_u8g2, 34, 47, "3");
+u8g2_DrawUTF8(&s_u8g2, 46, 47, "12");
+u8g2_DrawRFrame(&s_u8g2, 106, 38, 19, 11, 1);
+u8g2_DrawUTF8(&s_u8g2, 108, 47, "38s");
 // Batch progress bar
 u8g2_DrawFrame(&s_u8g2, 0, 51, 128, 10);
 u8g2_DrawBox(&s_u8g2, 1, 52, 42, 8);`,
@@ -350,24 +366,24 @@ u8g2_DrawBox(&s_u8g2, 1, 52, 42, 8);`,
             cCode: `u8g2_SetDrawColor(&s_u8g2, 1);
 u8g2_DrawBox(&s_u8g2, 0, 0, 128, 12);
 u8g2_SetDrawColor(&s_u8g2, 0);
-u8g2_SetFont(&s_u8g2, u8g2_font_6x10_tr);
-u8g2_DrawStr(&s_u8g2, 4, 9, "PERFIL EQ");
+u8g2_SetFont(&s_u8g2, u8g2_font_6x10_tf);
+u8g2_DrawUTF8(&s_u8g2, 4, 9, "PERFIL EQ");
 u8g2_DrawBox(&s_u8g2, 104, 1, 22, 10);
 u8g2_SetDrawColor(&s_u8g2, 1);
-u8g2_DrawStr(&s_u8g2, 109, 9, "ON");
+u8g2_DrawUTF8(&s_u8g2, 109, 9, "ON");
 // Selected row 1
 u8g2_DrawBox(&s_u8g2, 0, 14, 128, 12);
 u8g2_SetDrawColor(&s_u8g2, 0);
-u8g2_DrawStr(&s_u8g2, 2, 24, "*1.Harman Target");
-u8g2_DrawStr(&s_u8g2, 118, 24, ">");
+u8g2_DrawUTF8(&s_u8g2, 2, 24, "*1.Harman Target");
+u8g2_DrawUTF8(&s_u8g2, 118, 24, ">");
 // Other rows
 u8g2_SetDrawColor(&s_u8g2, 1);
-u8g2_DrawStr(&s_u8g2, 2, 37, " 2.Flat Reference");
-u8g2_DrawStr(&s_u8g2, 2, 50, " 3.Bass Boost");
+u8g2_DrawUTF8(&s_u8g2, 2, 37, " 2.Flat Reference");
+u8g2_DrawUTF8(&s_u8g2, 2, 50, " 3.Bass Boost");
 // Footer
 u8g2_DrawLine(&s_u8g2, 0, 54, 128, 54);
-u8g2_SetFont(&s_u8g2, u8g2_font_4x6_tr);
-u8g2_DrawStr(&s_u8g2, 2, 62, "> Bandas | Segure: Renomear");`,
+u8g2_SetFont(&s_u8g2, u8g2_font_4x6_tf);
+u8g2_DrawUTF8(&s_u8g2, 2, 62, "> Bandas | Segure: Renomear");`,
         },
         {
             id: 'sd_error_screen',
@@ -380,35 +396,38 @@ u8g2_DrawStr(&s_u8g2, 2, 62, "> Bandas | Segure: Renomear");`,
             cCode: `${buildDecl(bitmaps, ['image_SDQuestion_copy_1_bits'])}
 u8g2_SetDrawColor(&s_u8g2, 1);
 u8g2_DrawXBM(&s_u8g2, 12, 8, 35, 43, image_SDQuestion_copy_1_bits);
-u8g2_SetFont(&s_u8g2, u8g2_font_helvB08_tr);
-u8g2_DrawStr(&s_u8g2, 55, 29, "Erro ao montar");
-u8g2_DrawStr(&s_u8g2, 65, 39, "o SD card !");
-u8g2_SetFont(&s_u8g2, u8g2_font_6x10_tr);
-u8g2_DrawStr(&s_u8g2, 6, 62, "verifique a fiacao !");`,
+u8g2_SetFont(&s_u8g2, u8g2_font_helvB08_te);
+u8g2_DrawUTF8(&s_u8g2, 55, 29, "Erro ao montar");
+u8g2_DrawUTF8(&s_u8g2, 65, 39, "o SD card !");
+u8g2_SetFont(&s_u8g2, u8g2_font_6x10_tf);
+u8g2_DrawUTF8(&s_u8g2, 6, 62, "verifique a fiacao !");`,
         },
         {
             id: 'lock_clock_screen',
             title: 'lock_clock',
             category: 'System',
-            description: 'Tela de bloqueio / repouso com relógio DS3231, data Sakamoto, bateria e faixa atual.',
+            description: 'Tela de bloqueio / repouso com relógio DS3231 em profont29, abas de dia/data em profont15, faixa no topo e bateria.',
             width: 128,
             height: 64,
-            sourceRef: 'oled_display.c:5644',
-            cCode: `u8g2_SetDrawColor(&s_u8g2, 1);
-u8g2_SetFont(&s_u8g2, u8g2_font_4x6_tr);
-u8g2_DrawFrame(&s_u8g2, 4, 3, 6, 5);
-u8g2_DrawStr(&s_u8g2, 13, 8, "BLOQUEADO");
-u8g2_DrawStr(&s_u8g2, 100, 8, "84%");
-u8g2_DrawFrame(&s_u8g2, 118, 2, 8, 6);
-u8g2_DrawHLine(&s_u8g2, 0, 10, 128);
-u8g2_SetFont(&s_u8g2, u8g2_font_logisoso16_tn);
-u8g2_DrawStr(&s_u8g2, 20, 29, "23:45:12");
-u8g2_SetFont(&s_u8g2, u8g2_font_6x10_tr);
-u8g2_DrawStr(&s_u8g2, 18, 42, "SAB, 14/11/2026");
-u8g2_DrawHLine(&s_u8g2, 0, 47, 128);
-u8g2_SetFont(&s_u8g2, u8g2_font_4x6_tr);
-u8g2_DrawStr(&s_u8g2, 16, 56, "[SEGURE C] DESBLOQUEAR");
-u8g2_DrawStr(&s_u8g2, 4, 63, "> A Cruel Angel's Thesis");`,
+            sourceRef: 'oled_display.c:6144',
+            cCode: `static const unsigned char s_icon_bat_98_11x9[] U8X8_PROGMEM = {0xfe, 0x03, 0x01, 0x04, 0xdd, 0x05, 0x55, 0x05, 0xdd, 0x05, 0x51, 0x05, 0xd1, 0x05, 0x01, 0x04, 0xfe, 0x03};
+u8g2_SetDrawColor(&s_u8g2, 1);
+u8g2_DrawVLine(&s_u8g2, 97, 0, 8);
+u8g2_DrawHLine(&s_u8g2, 0, 8, 97);
+u8g2_SetFont(&s_u8g2, u8g2_font_4x6_tf);
+u8g2_DrawUTF8(&s_u8g2, 0, 6, "> A Cruel Angel's Thesis");
+u8g2_DrawXBM(&s_u8g2, 118, 0, 11, 9, s_icon_bat_98_11x9);
+u8g2_SetFont(&s_u8g2, u8g2_font_profont29_tf);
+u8g2_DrawUTF8(&s_u8g2, 0, 40, "23:45:12");
+u8g2_DrawHLine(&s_u8g2, 1, 53, 24);
+u8g2_DrawVLine(&s_u8g2, 0, 54, 10);
+u8g2_DrawVLine(&s_u8g2, 25, 54, 10);
+u8g2_SetFont(&s_u8g2, u8g2_font_profont15_tf);
+u8g2_DrawUTF8(&s_u8g2, 3, 64, "SAB");
+u8g2_DrawHLine(&s_u8g2, 54, 52, 73);
+u8g2_DrawVLine(&s_u8g2, 53, 53, 11);
+u8g2_DrawVLine(&s_u8g2, 127, 53, 11);
+u8g2_DrawUTF8(&s_u8g2, 56, 64, "14/11/2026");`,
         },
         {
             id: 'chrono_screen',
@@ -419,20 +438,20 @@ u8g2_DrawStr(&s_u8g2, 4, 63, "> A Cruel Angel's Thesis");`,
             height: 64,
             sourceRef: 'oled_display.c:5573',
             cCode: `u8g2_SetDrawColor(&s_u8g2, 1);
-u8g2_SetFont(&s_u8g2, u8g2_font_profont11_tr);
-u8g2_DrawStr(&s_u8g2, 3, 10, "CRONOMETRO");
-u8g2_SetFont(&s_u8g2, u8g2_font_4x6_tr);
-u8g2_DrawStr(&s_u8g2, 86, 9, "[RODANDO]");
+u8g2_SetFont(&s_u8g2, u8g2_font_profont11_tf);
+u8g2_DrawUTF8(&s_u8g2, 3, 10, "CRONOMETRO");
+u8g2_SetFont(&s_u8g2, u8g2_font_4x6_tf);
+u8g2_DrawUTF8(&s_u8g2, 86, 9, "[RODANDO]");
 u8g2_DrawHLine(&s_u8g2, 0, 12, 128);
 u8g2_SetFont(&s_u8g2, u8g2_font_logisoso16_tn);
-u8g2_DrawStr(&s_u8g2, 20, 33, "01:24.58");
+u8g2_DrawUTF8(&s_u8g2, 20, 33, "01:24.58");
 u8g2_DrawHLine(&s_u8g2, 4, 37, 120);
-u8g2_SetFont(&s_u8g2, u8g2_font_5x7_tr);
-u8g2_DrawStr(&s_u8g2, 6, 47, "V2: 00:42.15");
-u8g2_DrawStr(&s_u8g2, 70, 47, "V1: 00:21.04");
+u8g2_SetFont(&s_u8g2, u8g2_font_5x7_tf);
+u8g2_DrawUTF8(&s_u8g2, 6, 47, "V2: 00:42.15");
+u8g2_DrawUTF8(&s_u8g2, 70, 47, "V1: 00:21.04");
 u8g2_DrawHLine(&s_u8g2, 0, 51, 128);
-u8g2_SetFont(&s_u8g2, u8g2_font_4x6_tr);
-u8g2_DrawStr(&s_u8g2, 4, 61, "[C] Pausar  [DIR] Volta  [ESQ] Sair");`,
+u8g2_SetFont(&s_u8g2, u8g2_font_4x6_tf);
+u8g2_DrawUTF8(&s_u8g2, 4, 61, "[C] Pausar  [DIR] Volta  [ESQ] Sair");`,
         },
         {
             id: 'loading_screen',
@@ -445,8 +464,8 @@ u8g2_DrawStr(&s_u8g2, 4, 61, "[C] Pausar  [DIR] Volta  [ESQ] Sair");`,
             cCode: `${buildDecl(bitmaps, ['image_LoadingHourglass_bits'])}
 u8g2_SetDrawColor(&s_u8g2, 1);
 u8g2_DrawXBM(&s_u8g2, 52, 20, 24, 24, image_LoadingHourglass_bits);
-u8g2_SetFont(&s_u8g2, u8g2_font_helvB08_tr);
-u8g2_DrawStr(&s_u8g2, 31, 56, "Carregando...");`,
+u8g2_SetFont(&s_u8g2, u8g2_font_helvB08_te);
+u8g2_DrawUTF8(&s_u8g2, 31, 56, "Carregando...");`,
         },
     ];
 }
