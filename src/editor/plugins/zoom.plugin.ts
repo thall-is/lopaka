@@ -13,6 +13,20 @@ export class ZoomPlugin extends AbstractEditorPlugin {
     private stopScaleWatch: WatchStopHandle | null = null;
     private stopDisplayWatch: WatchStopHandle | null = null;
     private isWheelZooming = false;
+    private isMiddlePanning = false;
+    private hasUserPanned = false;
+    private lastPanClientX = 0;
+    private lastPanClientY = 0;
+
+    private boundMouseDown = (e: MouseEvent) => this.handleMiddleMouseDown(e);
+    private boundMouseMove = (e: MouseEvent) => this.handleMiddleMouseMove(e);
+    private boundMouseUp = (e: MouseEvent) => this.handleMiddleMouseUp(e);
+    private boundAuxClick = (e: MouseEvent) => {
+        if (e.button === 1) {
+            e.preventDefault();
+        }
+    };
+    private boundBlur = () => this.stopMiddlePan();
 
     constructor(session: Session, container: HTMLElement) {
         super(session, container);
@@ -69,15 +83,70 @@ export class ZoomPlugin extends AbstractEditorPlugin {
 
         // Initial centering after DOM is ready
         nextTick(() => this.centerCanvas());
+
+        // Middle mouse button (scroll click) drag to pan canvas like BlinknBuild OLED Studio
+        sc.addEventListener('mousedown', this.boundMouseDown, {capture: true});
+        sc.addEventListener('auxclick', this.boundAuxClick);
+        window.addEventListener('mousemove', this.boundMouseMove);
+        window.addEventListener('mouseup', this.boundMouseUp);
+        window.addEventListener('blur', this.boundBlur);
     }
 
     onWheel(event: WheelEvent): void {
-        if (event.ctrlKey || event.metaKey) {
-            event.preventDefault();
-            this.handleZoom(event);
-        } else {
-            event.preventDefault();
+        event.preventDefault();
+        if (event.shiftKey && !event.ctrlKey && !event.metaKey) {
             this.handlePan(event);
+        } else if (event.deltaY === 0 && event.deltaX !== 0 && !event.ctrlKey && !event.metaKey) {
+            this.handlePan(event);
+        } else {
+            this.handleZoom(event);
+        }
+    }
+
+    private handleMiddleMouseDown(event: MouseEvent): void {
+        if (event.button !== 1) return;
+        event.preventDefault();
+        event.stopPropagation();
+        this.isMiddlePanning = true;
+        this.lastPanClientX = event.clientX;
+        this.lastPanClientY = event.clientY;
+        const sc = this.getScrollContainer();
+        if (sc) {
+            sc.style.cursor = 'grabbing';
+        }
+    }
+
+    private handleMiddleMouseMove(event: MouseEvent): void {
+        if (!this.isMiddlePanning) return;
+        if (typeof event.buttons === 'number' && event.buttons !== 0 && (event.buttons & 4) === 0) {
+            this.stopMiddlePan();
+            return;
+        }
+        event.preventDefault();
+        const dx = event.clientX - this.lastPanClientX;
+        const dy = event.clientY - this.lastPanClientY;
+        this.lastPanClientX = event.clientX;
+        this.lastPanClientY = event.clientY;
+        this.panX += dx;
+        this.panY += dy;
+        this.hasUserPanned = true;
+        this.clampFreePan();
+        this.applyTransform();
+    }
+
+    private handleMiddleMouseUp(event: MouseEvent): void {
+        if (!this.isMiddlePanning) return;
+        if (event.button === 1 || event.type === 'mouseup') {
+            this.stopMiddlePan();
+        }
+    }
+
+    private stopMiddlePan(): void {
+        if (!this.isMiddlePanning) return;
+        this.isMiddlePanning = false;
+        const sc = this.getScrollContainer();
+        if (sc) {
+            sc.style.cursor = '';
         }
     }
 
@@ -109,7 +178,7 @@ export class ZoomPlugin extends AbstractEditorPlugin {
         if (!sc || !cw) return;
 
         const now = Date.now();
-        if (now - this.lastZoomTime < 100) {
+        if (now - this.lastZoomTime < 25) {
             return;
         }
 
@@ -157,7 +226,11 @@ export class ZoomPlugin extends AbstractEditorPlugin {
         nextTick(() => {
             this.panX = newPanX;
             this.panY = newPanY;
-            this.clampPan();
+            if (this.hasUserPanned) {
+                this.clampFreePan();
+            } else {
+                this.clampPan();
+            }
             this.applyTransform();
             this.isWheelZooming = false;
         });
@@ -179,7 +252,11 @@ export class ZoomPlugin extends AbstractEditorPlugin {
 
         this.panX = centerX - (centerX - this.panX) * ratio;
         this.panY = centerY - (centerY - this.panY) * ratio;
-        this.clampPan();
+        if (this.hasUserPanned) {
+            this.clampFreePan();
+        } else {
+            this.clampPan();
+        }
         this.applyTransform();
     }
 
@@ -193,9 +270,26 @@ export class ZoomPlugin extends AbstractEditorPlugin {
         const canvasW = cw.offsetWidth;
         const canvasH = cw.offsetHeight;
 
+        this.hasUserPanned = false;
         this.panX = (containerW - canvasW) / 2;
         this.panY = (containerH - canvasH) / 2;
         this.applyTransform();
+    }
+
+    private clampFreePan(): void {
+        const sc = this.getScrollContainer();
+        const cw = this.getCanvasWrapper();
+        if (!sc || !cw) return;
+
+        const containerW = sc.clientWidth;
+        const containerH = sc.clientHeight;
+        const canvasW = cw.offsetWidth;
+        const canvasH = cw.offsetHeight;
+
+        const minVisibleX = Math.min(containerW / 2, Math.max(48, canvasW / 3));
+        const minVisibleY = Math.min(containerH / 2, Math.max(48, canvasH / 3));
+        this.panX = Math.max(-(canvasW - minVisibleX), Math.min(containerW - minVisibleX, this.panX));
+        this.panY = Math.max(-(canvasH - minVisibleY), Math.min(containerH - minVisibleY, this.panY));
     }
 
     private clampPan(): void {
@@ -232,6 +326,14 @@ export class ZoomPlugin extends AbstractEditorPlugin {
     }
 
     onDestroy(): void {
+        this.stopMiddlePan();
+        if (this.scrollContainer) {
+            this.scrollContainer.removeEventListener('mousedown', this.boundMouseDown, {capture: true});
+            this.scrollContainer.removeEventListener('auxclick', this.boundAuxClick);
+        }
+        window.removeEventListener('mousemove', this.boundMouseMove);
+        window.removeEventListener('mouseup', this.boundMouseUp);
+        window.removeEventListener('blur', this.boundBlur);
         if (this.stopScaleWatch) {
             this.stopScaleWatch();
             this.stopScaleWatch = null;

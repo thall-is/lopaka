@@ -68,6 +68,13 @@ import {
     CheckIcon,
     PlusIcon,
     ArrowRightEndOnRectangleIcon,
+    TableCellsIcon,
+    Squares2X2Icon,
+    FolderArrowDownIcon,
+    FolderOpenIcon,
+    ChevronUpIcon,
+    CpuChipIcon,
+    ArrowDownTrayIcon,
 } from '@heroicons/vue/24/outline';
 import { StarIcon as StarSolidIcon, XMarkIcon } from '@heroicons/vue/24/solid';
 
@@ -151,6 +158,13 @@ const icons = {
     plus: PlusIcon,
     textarea: TextAreaIcon,
     polygon: PolygonIcon,
+    grid: TableCellsIcon,
+    screens: Squares2X2Icon,
+    'folder-download': FolderArrowDownIcon,
+    'folder-open': FolderOpenIcon,
+    'chevron-up': ChevronUpIcon,
+    chip: CpuChipIcon,
+    'export-file': ArrowDownTrayIcon,
 };
 
 const classList = computed(() => ({

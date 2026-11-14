@@ -65,6 +65,11 @@ const disabled = computed(
         !(session.editor.state.activeLayer as PaintLayer).data
 );
 
+const layersCount = computed(() => {
+    session.state.immidiateUpdates;
+    return session.layersManager.layers.length;
+});
+
 const tree = computed<LayerTreeNode[]>(() => {
     session.state.immidiateUpdates;
     session.state.selectionUpdates;
@@ -581,9 +586,15 @@ function groupLayerDropClasses(group: string, layerUid: string) {
 </script>
 
 <template>
-    <ul
-        ref="container"
-        class="menu menu-xs w-[200px] p-0 layers-list flex-nowrap"
+    <div class="flex flex-col">
+        <div
+            class="flex items-center justify-between px-2 py-1.5 border-b border-secondary text-xs font-semibold uppercase tracking-wider text-gray-300"
+        >
+            <span>Layers ({{ layersCount }})</span>
+        </div>
+        <ul
+            ref="container"
+            class="menu menu-xs w-[200px] p-0 layers-list flex-nowrap"
         @dragover="onDragOver"
         @drop="onDrop"
         @dragleave="onDragLeave"
@@ -674,6 +685,7 @@ function groupLayerDropClasses(group: string, layerUid: string) {
             </li>
         </template>
     </ul>
+    </div>
 </template>
 
 <style lang="css">
@@ -721,7 +733,7 @@ function groupLayerDropClasses(group: string, layerUid: string) {
 .layers-list {
     overflow-y: auto;
     overflow-x: hidden;
-    max-height: calc(87vh - 100px);
+    max-height: calc(54vh - 80px);
 }
 
 .group-row {

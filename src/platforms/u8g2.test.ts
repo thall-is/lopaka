@@ -88,4 +88,30 @@ describe('U8g2 platform', () => {
         expect(states[0].position.xy).toEqual([10, 10]);
         expect(states[0].radius).toBe(10);
     });
+
+    it('imports MPS3 ESP-IDF U8g2 C calls (DrawBox, DrawRFrame, DrawHLine, SetDrawColor, _tf/_tn fonts)', () => {
+        const platform = new U8g2Platform();
+        const cSnippet = `
+            u8g2_SetDrawColor(&s_u8g2, 1);
+            u8g2_DrawBox(&s_u8g2, 4, 14, 38, 13);
+            u8g2_DrawRFrame(&s_u8g2, 2, 15, 124, 19, 3);
+            u8g2_DrawHLine(&s_u8g2, 0, 12, 128);
+            u8g2_SetDrawColor(&s_u8g2, 0);
+            u8g2_SetFont(&s_u8g2, u8g2_font_5x7_tf);
+            u8g2_DrawStr(&s_u8g2, 10, 24, "FLAC");
+            u8g2_SetFont(&s_u8g2, u8g2_font_tom_thumb_4x6_t_all);
+            u8g2_DrawStr(&s_u8g2, 10, 48, "-40");
+        `;
+        const {states, warnings} = platform.importSourceCode(cSnippet);
+
+        expect(warnings).toEqual([]);
+        expect(states).toHaveLength(5);
+        expect(states[0]).toMatchObject({type: 'rect', fill: true, color: '#ffffff'});
+        expect(states[1]).toMatchObject({type: 'rect', fill: false, radius: 3});
+        expect(states[2]).toMatchObject({type: 'line'});
+        expect(states[2].p1.xy).toEqual([0, 12]);
+        expect(states[2].p2.xy).toEqual([127, 12]);
+        expect(states[3]).toMatchObject({type: 'string', font: '5x7', color: '#000000', text: 'FLAC'});
+        expect(states[4]).toMatchObject({type: 'string', font: '4x6', color: '#000000', text: '-40'});
+    });
 });

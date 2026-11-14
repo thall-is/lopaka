@@ -35,9 +35,28 @@ import { AbstractDrawingRenderer } from '../draw/renderers';
 import { SCALE_LIST } from '/src/const';
 import { syncProjectClipboard } from './project-clipboard';
 import { EditorActions } from './editor-actions';
+import { updateScreenSnapshotInStorage } from './screens-manager';
 
 const sessions = new Map<string, UnwrapRef<Session>>();
 let currentSessionId = null;
+
+export type TGridSettings = {
+    enabled: boolean;
+    subdivision: number; // 0 = off, 4, 8, 16
+    showCenter: boolean;
+    showHoverPixel: boolean;
+    opacity: number; // 0.1 to 1.0
+    colorMode: 'studio' | 'cyan' | 'amber' | 'contrast' | 'white';
+};
+
+export const DEFAULT_GRID_SETTINGS: TGridSettings = {
+    enabled: true,
+    subdivision: 8,
+    showCenter: false,
+    showHoverPixel: true,
+    opacity: 0.85,
+    colorMode: 'studio',
+};
 
 export type TSessionState = {
     platform: string;
@@ -55,6 +74,8 @@ export type TSessionState = {
     brushColor: string;
     paintColorMode: 'rgb' | 'monochrome';
     screenTitle: string;
+    grid: TGridSettings;
+    hoverPixel: { x: number; y: number } | null;
     imageWizard: {
         isOpen: boolean;
         onSaveCallback?: (processedImagesArr: any[]) => void;
@@ -106,6 +127,8 @@ export class Session {
         brushColor: '#ffffff',
         paintColorMode: 'monochrome',
         screenTitle: '',
+        grid: { ...DEFAULT_GRID_SETTINGS },
+        hoverPixel: null,
         imageWizard: {
             isOpen: false,
             onSaveCallback: null,
@@ -331,6 +354,16 @@ export class Session {
         this.state.screenTitle = title;
     };
 
+    setGridSettings = (partial: Partial<TGridSettings>) => {
+        Object.assign(this.state.grid, partial);
+        localStorage.setItem('lopaka_grid_settings_v2', JSON.stringify(this.state.grid));
+        this.virtualScreen.redrawPlugins();
+    };
+
+    toggleGrid = () => {
+        this.setGridSettings({ enabled: !this.state.grid.enabled });
+    };
+
     importCode = async (code: string, append: boolean = false) => {
         const { platform } = this.state;
         const { states, warnings } = this.platforms[platform].importSourceCode(code);
@@ -439,13 +472,21 @@ export async function loadLayers(states: any[], append: boolean = false, saveHis
 type SaveLayersSnapshot = {
     layers?: any[];
     imagePreview?: string;
+    platform?: string;
 };
 
 export function saveLayers(screen_id, snapshot: SaveLayersSnapshot = {}) {
     const session = useSession();
+    const targetPlatform = snapshot.platform ?? session.state.platform;
     // Prefer captured payload when provided to avoid saving mixed screen state after async switches.
     const packedSession = snapshot.layers ?? session.layersManager.layers.map((l) => l.state);
-    localStorage.setItem(`${session.state.platform}_lopaka_layers`, JSON.stringify(packedSession));
+    localStorage.setItem(`${targetPlatform}_lopaka_layers`, JSON.stringify(packedSession));
+    if (screen_id !== undefined && screen_id !== null && targetPlatform) {
+        updateScreenSnapshotInStorage(targetPlatform, screen_id, {
+            layers: packedSession,
+            imagePreview: snapshot.imagePreview,
+        });
+    }
     return Promise.resolve();
 }
 
@@ -535,6 +576,14 @@ export function useSession(id?: string) {
     const session = new Session();
     const scaleLocal = JSON.parse(localStorage.getItem('lopaka_scale') ?? '400');
     session.setScale(scaleLocal);
+    try {
+        const savedGrid = localStorage.getItem('lopaka_grid_settings_v2');
+        if (savedGrid) {
+            Object.assign(session.state.grid, JSON.parse(savedGrid));
+        }
+    } catch {
+        // ignore invalid saved grid settings
+    }
     sessions.set(session.id, session);
     currentSessionId = session.id;
     return session;

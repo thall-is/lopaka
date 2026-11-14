@@ -7,6 +7,7 @@ import bdfFormatPlugin from './vite-plugins/bdf-format';
 import gfxFormatPlugin from './vite-plugins/gfx-format';
 import pugTemplatePlugin from './vite-plugins/pug-template';
 import svgComponentPlugin from './vite-plugins/svg-component';
+import mps3DeviceBridgePlugin from './vite-plugins/mps3-device-bridge';
 
 export default defineConfig({
     base: '/',
@@ -18,6 +19,7 @@ export default defineConfig({
         gfxFormatPlugin,
         pugTemplatePlugin,
         svgComponentPlugin,
+        mps3DeviceBridgePlugin(),
     ],
     esbuild: {
         keepNames: true,

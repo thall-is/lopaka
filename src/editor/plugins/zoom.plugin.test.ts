@@ -96,6 +96,7 @@ function createWheelEvent(opts: Partial<WheelEvent> & {deltaY?: number; deltaX?:
         deltaX: opts.deltaX ?? 0,
         ctrlKey: opts.ctrlKey ?? false,
         metaKey: opts.metaKey ?? false,
+        shiftKey: opts.shiftKey ?? false,
         clientX: opts.clientX ?? 0,
         clientY: opts.clientY ?? 0,
     });
@@ -129,11 +130,21 @@ describe('ZoomPlugin', () => {
             expect(spy).toHaveBeenCalled();
         });
 
-        it('should call preventDefault for regular wheel (pan)', () => {
+        it('should call preventDefault for regular wheel (zoom)', () => {
             const event = createWheelEvent({deltaY: 10});
             const spy = vi.spyOn(event, 'preventDefault');
             plugin.onWheel(event);
             expect(spy).toHaveBeenCalled();
+        });
+
+        it('should call scaleUp on plain scroll up (deltaY < 0)', () => {
+            plugin.onWheel(createWheelEvent({deltaY: -120}));
+            expect(session.scaleUp).toHaveBeenCalled();
+        });
+
+        it('should call scaleDown on plain scroll down (deltaY > 0)', () => {
+            plugin.onWheel(createWheelEvent({deltaY: 120}));
+            expect(session.scaleDown).toHaveBeenCalled();
         });
 
         it('should call scaleUp on Ctrl + scroll up (deltaY < 0)', () => {
@@ -146,23 +157,22 @@ describe('ZoomPlugin', () => {
             expect(session.scaleDown).toHaveBeenCalled();
         });
 
-        it('should not call scaleUp/scaleDown for regular wheel', () => {
-            plugin.onWheel(createWheelEvent({deltaY: 1200}));
+        it('should pan instead of zooming when Shift is held during wheel', () => {
+            plugin.onWheel(createWheelEvent({shiftKey: true, deltaY: 1200}));
             expect(session.scaleUp).not.toHaveBeenCalled();
             expect(session.scaleDown).not.toHaveBeenCalled();
         });
     });
 
     describe('handlePan', () => {
-        it('should shift panX by negative deltaX', () => {
+        it('should shift panX by negative deltaX on horizontal wheel', () => {
             plugin.onWheel(createWheelEvent({deltaX: 50, deltaY: 0}));
             // Canvas fits (200 < 800), so panX is clamped to center: (800-200)/2 = 300
-            // Panning doesn't change centering when canvas fits
             expect(dom.canvasWrapper.style.transform).toContain('translate(');
         });
 
-        it('should shift panY by negative deltaY for vertical scroll', () => {
-            plugin.onWheel(createWheelEvent({deltaX: 0, deltaY: 30}));
+        it('should shift panY by negative deltaY for Shift + vertical scroll', () => {
+            plugin.onWheel(createWheelEvent({shiftKey: true, deltaX: 0, deltaY: 30}));
             // Canvas fits (150 < 600), so panY is clamped to center: (600-150)/2 = 225
             expect(dom.canvasWrapper.style.transform).toContain('translate(');
         });
@@ -193,7 +203,7 @@ describe('ZoomPlugin', () => {
             // Container: 800x600, Canvas: 200x150
             // centerX = (800-200)/2 = 300, centerY = (600-150)/2 = 225
             // Pan a lot and verify it gets clamped back to center
-            plugin.onWheel(createWheelEvent({deltaX: 9999, deltaY: 9999}));
+            plugin.onWheel(createWheelEvent({shiftKey: true, deltaX: 9999, deltaY: 9999}));
             expect(dom.canvasWrapper.style.transform).toBe('translate(300px, 225px)');
         });
 
@@ -224,7 +234,7 @@ describe('ZoomPlugin', () => {
         it('should center canvas when it fits', () => {
             // Container 800x600, Canvas 200x150
             // After init, canvas is centered via nextTick, but we can trigger it via pan+clamp
-            plugin.onWheel(createWheelEvent({deltaX: 0, deltaY: 0}));
+            plugin.onWheel(createWheelEvent({shiftKey: true, deltaX: 0, deltaY: 0}));
             expect(dom.canvasWrapper.style.transform).toBe('translate(300px, 225px)');
         });
 
@@ -233,7 +243,7 @@ describe('ZoomPlugin', () => {
             dom = createDOMStructure(400, 300, 400, 300); // exact fit
             plugin = new ZoomPlugin(session as any, dom.container);
 
-            plugin.onWheel(createWheelEvent({deltaX: 0, deltaY: 0}));
+            plugin.onWheel(createWheelEvent({shiftKey: true, deltaX: 0, deltaY: 0}));
             expect(dom.canvasWrapper.style.transform).toBe('translate(0px, 0px)');
         });
 
@@ -361,6 +371,51 @@ describe('ZoomPlugin', () => {
         });
     });
 
+    describe('middle-click drag panning', () => {
+        it('should pan freely on middle mouse button drag even when canvas fits container', async () => {
+            await nextTick(); // Initial centerCanvas -> (300, 225)
+            const initialPan = plugin.getPan();
+            expect(initialPan.x).toBe(300);
+            expect(initialPan.y).toBe(225);
+
+            dom.scrollContainer.dispatchEvent(
+                new MouseEvent('mousedown', {button: 1, clientX: 400, clientY: 300, bubbles: true})
+            );
+            expect(dom.scrollContainer.style.cursor).toBe('grabbing');
+
+            window.dispatchEvent(
+                new MouseEvent('mousemove', {buttons: 4, clientX: 475, clientY: 260, bubbles: true})
+            );
+            const movedPan = plugin.getPan();
+            expect(movedPan.x).toBe(375);
+            expect(movedPan.y).toBe(185);
+            expect(dom.canvasWrapper.style.transform).toBe('translate(375px, 185px)');
+
+            window.dispatchEvent(new MouseEvent('mouseup', {button: 1, bubbles: true}));
+            expect(dom.scrollContainer.style.cursor).toBe('');
+
+            // Further mousemove after mouseup must not pan
+            window.dispatchEvent(
+                new MouseEvent('mousemove', {buttons: 0, clientX: 550, clientY: 400, bubbles: true})
+            );
+            expect(plugin.getPan().x).toBe(375);
+            expect(plugin.getPan().y).toBe(185);
+        });
+
+        it('should ignore left mouse button down', async () => {
+            await nextTick();
+            dom.scrollContainer.dispatchEvent(
+                new MouseEvent('mousedown', {button: 0, clientX: 100, clientY: 100, bubbles: true})
+            );
+            expect(dom.scrollContainer.style.cursor).toBe('');
+            window.dispatchEvent(
+                new MouseEvent('mousemove', {buttons: 1, clientX: 200, clientY: 200, bubbles: true})
+            );
+            expect(plugin.getPan().x).toBe(300);
+            expect(plugin.getPan().y).toBe(225);
+        });
+    });
+
     describe('onDestroy', () => {
         it('should clean up without errors', () => {
             expect(() => plugin.onDestroy()).not.toThrow();
@@ -373,6 +428,7 @@ describe('ZoomPlugin', () => {
     });
 
     afterEach(() => {
+        plugin?.onDestroy();
         vi.useRealTimers();
     });
 });

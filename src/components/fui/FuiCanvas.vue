@@ -6,14 +6,6 @@ const props = defineProps<{
     readonly?: Boolean;
 }>();
 
-const gridSize = computed(() => {
-    return `${scale.value.x}px ${scale.value.y}px`;
-});
-
-const gridDisplay = computed(() => {
-    return scale.value.x >= 3 ? 'block' : 'none';
-});
-
 const screen = ref(null);
 const container = ref(null);
 const session = useSession();
@@ -26,7 +18,15 @@ const screenBackground = computed(() => {
     // Platform feature objects are shared plain objects. Depend on the
     // session mutation counter so WebMCP feature updates invalidate this CSS.
     immidiateUpdates.value;
-    return platformFeatures.value?.screenBgColor ?? '#000000';
+    const baseBg = platformFeatures.value?.screenBgColor ?? '#000000';
+    if (
+        state.grid.enabled &&
+        state.grid.colorMode === 'studio' &&
+        baseBg.toLowerCase() === '#000000'
+    ) {
+        return '#232634';
+    }
+    return baseBg;
 });
 
 onMounted(() => {
@@ -122,9 +122,10 @@ const canvasClassNames = computed(() => {
     position: absolute;
     left: 0;
     top: 0;
-    background-color: white;
+    background-color: #0b0d13;
     height: fit-content;
-    border: 10px solid oklch(var(--b1));
+    border: 8px solid #141722;
+    box-shadow: 0 10px 34px rgba(0, 0, 0, 0.65);
     transform-origin: 0 0;
     will-change: transform;
 }
@@ -169,20 +170,8 @@ const canvasClassNames = computed(() => {
 .fui-grid {
     box-sizing: content-box;
     position: relative;
-    &::after {
-        content: '';
-        position: absolute;
-        inset: 0;
-        background-image:
-            linear-gradient(to right, var(--color-grid) 0.1px, transparent 0.5px),
-            linear-gradient(to bottom, var(--color-grid) 0.1px, transparent 0.5px);
-        background-size: v-bind(gridSize);
-        opacity: 0.2;
-        z-index: 1;
-        pointer-events: none;
-        display: v-bind(gridDisplay);
-    }
-    border: 1px solid oklch(var(--s));
+    background-color: #0b0d13;
+    border: 1px solid #2b3144;
 }
 
 .fui-canvas_select {

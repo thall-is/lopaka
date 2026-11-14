@@ -13,6 +13,7 @@ import Inspector from '/src/components/fui/inspector/Inspector.vue';
 import FuiSelectDisplay from '/src/components/fui/FuiSelectDisplay/FuiSelectDisplay.vue';
 import FuiSelectPlatform from '/src/components/fui/FuiSelectPlatform.vue';
 import FuiSelectScale from '/src/components/fui/FuiSelectScale.vue';
+import FuiGridSettings from '/src/components/fui/FuiGridSettings.vue';
 import FuiTools from '/src/components/fui/FuiTools.vue';
 import PaintBrushColorInput from './PaintBrushColorInput.vue';
 import PaintColorModeToggle from './PaintColorModeToggle.vue';
@@ -79,6 +80,7 @@ const screenAutosave = createScreenAutosave(1000);
 watch(immidiateUpdates, (newValue, oldValue) => {
     // Capture the current id so delayed writes cannot target another screen.
     const capturedScreenId = props.screen.id;
+    const capturedPlatform = session.state.platform;
     // Capture layers immediately so delayed tasks do not read another screen state later.
     const capturedLayers = session.layersManager.layers.map((layer) => layer.state);
     // Capture preview immediately so delayed updates keep the right thumbnail.
@@ -92,9 +94,11 @@ watch(immidiateUpdates, (newValue, oldValue) => {
                 sendFlipperImage();
             }
             // Persist the captured snapshot for the exact screen that changed.
-            saveLayers(screenId, { layers: capturedLayers, imagePreview: capturedPreview });
+            saveLayers(screenId, { layers: capturedLayers, imagePreview: capturedPreview, platform: capturedPlatform });
             // Refresh only the matching screen thumbnail with the captured preview.
-            updateScreenPreview(screenId, capturedPreview);
+            if (capturedPlatform === session.state.platform) {
+                updateScreenPreview(screenId, capturedPreview, capturedLayers);
+            }
         },
     });
 });
@@ -193,11 +197,14 @@ function sendFlipperImage() {
     flipper.value.sendImage(virtualScreen.canvasContext.getImageData(0, 0, 128, 64));
 }
 
-function updateScreenPreview(screen_id, imagePreview) {
+function updateScreenPreview(screen_id, imagePreview, layers?) {
     if (!props.project.screens) return;
     props.project.screens = props.project.screens.map((item) => {
         if (item && item?.id === screen_id) {
             item.img_preview = imagePreview;
+            if (layers) {
+                item.layers = layers;
+            }
         }
         return item;
     });
@@ -285,7 +292,10 @@ function onMouseClick() {
                     <PaintColorModeToggle v-if="!readonly && showColorModeToggle" />
                     <PaintBrushColorInput v-if="!readonly && shouldShowBrushControls" />
                 </div>
-                <FuiSelectScale></FuiSelectScale>
+                <div class="flex items-center gap-3">
+                    <FuiGridSettings></FuiGridSettings>
+                    <FuiSelectScale></FuiSelectScale>
+                </div>
             </div>
             <div
                 v-if="!isScreenLoaded && !isScreenNotFound"
@@ -422,5 +432,6 @@ function onMouseClick() {
     flex-shrink: 1;
     overflow: hidden;
     position: relative;
+    background-color: #0b0d13;
 }
 </style>

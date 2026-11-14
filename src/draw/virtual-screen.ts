@@ -2,6 +2,7 @@ import {EffectScope, reactive, toRefs, watch} from 'vue';
 import {Session} from '../core/session';
 import {Point} from '../core/point';
 import {DrawPlugin} from './plugins/draw.plugin';
+import {GridPlugin} from './plugins/grid.plugin';
 import {RulerPlugin} from './plugins/ruler.plugin';
 import {SmartRulerPlugin} from './plugins/smart-ruler.plugin';
 import {HighlightPlugin} from './plugins/highlight.plugin';
@@ -42,6 +43,7 @@ export class VirtualScreen {
             willReadFrequently: true,
             alpha: true,
         });
+        this.plugins.push(new GridPlugin(session));
         if (options.ruler) {
             this.plugins.push(new RulerPlugin(session));
         }
@@ -68,6 +70,13 @@ export class VirtualScreen {
                 this.resize();
                 this.redraw();
             });
+            watch(
+                () => session.state.grid,
+                () => {
+                    this.redrawPlugins();
+                },
+                {deep: true}
+            );
         });
     }
 

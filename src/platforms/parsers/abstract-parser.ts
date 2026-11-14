@@ -4,7 +4,7 @@ export abstract class AbstractParser {
     protected variablesRegex = /(\w+)\s+(\w+)(\[\d+\])?(\s*=\s*([^;]+))?;/gm;
     protected definesRegex = /#define\s+([a-zA-Z0-9_]+)\s+([a-zA-Z0-9_]+)/gm;
     protected xbmpRegex =
-        /(char|uint8_t)\s+(PROGMEM)?\s*([a-zA-Z0-9_]+)\s*\[\]\s*([\w\d_]*PROGMEM)?\s*=\s+\{([^}]+)\};/gm;
+        /(?:static\s+)?(?:const\s+)?(?:unsigned\s+)?(char|uint8_t)\s+(PROGMEM\s+)?([a-zA-Z0-9_]+)\s*\[\s*\d*\s*\]\s*([\w\d_]*(?:U8X8_)?PROGMEM)?\s*=\s*\{([^}]+)\};/gm;
     protected cppMethodsRegexp = /(\w+)\s*\(/gm;
 
     parseSourceCode(sourceCode: string) {

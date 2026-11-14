@@ -115,6 +115,7 @@ export class Editor {
         if (this.scrollContainer) {
             this.scrollContainer.removeEventListener('wheel', this.onWheel);
         }
+        this.plugins.forEach((p: any) => p.onDestroy?.());
     }
 
     selectionUpdate(): void {
@@ -196,6 +197,9 @@ export class Editor {
         } else if (event instanceof DragEvent) {
             this.onDrop(new Point(event.offsetX, event.offsetY).divide(scale).round(), event);
         } else {
+            if (event instanceof MouseEvent && (event.button === 1 || ((event.buttons ?? 0) & 4) !== 0)) {
+                return;
+            }
             let offsetX;
             let offsetY;
             if ((event as TouchEvent).touches !== undefined) {
